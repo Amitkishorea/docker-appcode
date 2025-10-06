@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo-container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongoadmin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express-container
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: mongoadmin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: secret
+      ME_CONFIG_MONGODB_URL: "mongodb://mongoadmin:secret@mongo:27017/"
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  node-app:
+    image: amitkishorea/nodeapp-dockerimage:1.0
+    container_name: node-app-container
+    restart: always
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+    environment:
+      MONGO_URL: "mongodb://mongoadmin:secret@mongo:27017/"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+
+
